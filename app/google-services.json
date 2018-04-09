@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "232618736297",
+    "firebase_url": "https://solaria-d5c71.firebaseio.com",
+    "project_id": "solaria-d5c71",
+    "storage_bucket": "solaria-d5c71.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:232618736297:android:d14365178e50cd27",
+        "android_client_info": {
+          "package_name": "com.example.vtruta.solaria"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "232618736297-bfg1r1rkp5l6bj1tfpa5he5brbegua3c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.vtruta.solaria",
+            "certificate_hash": "f0338d4a542889eba6443c9075b94a43901eeb0c"
+          }
+        },
+        {
+          "client_id": "232618736297-8ttin7gpttp0u9kddluo1vifu2n4oj01.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAflN2LOTodUCjNi0fmVTkbJ85aCYyI0cU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "232618736297-c0f42g3osa6qjaq71rpvbmn2sda2ria5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.solariacompany.solaria.Solaria"
+              }
+            },
+            {
+              "client_id": "232618736297-8ttin7gpttp0u9kddluo1vifu2n4oj01.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

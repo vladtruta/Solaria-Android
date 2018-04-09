@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Solaria</string>
+
+    <string name="hello_blank_fragment">Hello control fragment</string>
+    <string name="channel_name">Solaria Notifications</string>
+    <string name="channel_description">The main notifications channel for Solaria</string>
+    <string name="default_notification_channel_id">SolariaChannelId</string>
+</resources>

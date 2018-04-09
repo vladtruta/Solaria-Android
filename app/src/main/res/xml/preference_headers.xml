@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    <header
+        android:fragment="com.example.vtruta.solaria.SettingsFragment"
+        android:icon="@drawable/ic_manage_devices"
+        android:title="Manage Devices"
+        android:summary="Rename or delete your paired systems">
+        <extra
+            android:name="setting"
+            android:value="manage" />
+    </header>
+    <header
+        android:fragment="com.example.vtruta.solaria.SettingsFragment"
+        android:icon="@drawable/ic_add_box"
+        android:title="Pair Device"
+        android:summary="Search for systems nearby">
+        <extra
+            android:name="setting"
+            android:value="pair" />
+    </header>
+</preference-headers>

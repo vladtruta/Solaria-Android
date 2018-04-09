@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:key="key_pref_manual_pair"
+        android:summary="Pair by entering the system ID manually"
+        android:title="Pair"
+        android:persistent="false"
+        android:dialogTitle="Enter system ID" />
+
+    <Preference
+        android:key="key_pref_refresh"
+        android:title="Refresh"
+        android:icon="@drawable/ic_refresh" />
+    <PreferenceCategory
+        android:key="pref_devices_nearby"
+        android:title="Devices Nearby">
+
+
+
+    </PreferenceCategory>
+</PreferenceScreen>
