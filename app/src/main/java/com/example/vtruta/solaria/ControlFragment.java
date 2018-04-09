@@ -5,34 +5,22 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.SwitchCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.Toast;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 
-public class ControlFragment extends Fragment implements ValueEventListener {
+public class ControlFragment extends Fragment implements SystemDataRepo.OnDatabaseUpdateListener, CompoundButton.OnCheckedChangeListener {
 
     private static final String TAG = "ControlFragment";
 
     private SwitchCompat mLightSwitch;
     private SwitchCompat mNutrientsSwitch;
-    private DatabaseReference mDatabase;
-    private String childString = "";
-    private Query mQuery;
+    private SystemData currentSystem;
+    private MainActivity mainActivity;
 
-    public ControlFragment() {
-    }
+    public ControlFragment() { }
 
     public static ControlFragment newInstance() {
         ControlFragment fragment = new ControlFragment();
@@ -48,68 +36,66 @@ public class ControlFragment extends Fragment implements ValueEventListener {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mainActivity.getRepoInstance().removeOnDatabaseUpdateListener(this);
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mLightSwitch = view.findViewById(R.id.light_switch);
         mNutrientsSwitch = view.findViewById(R.id.nutrients_switch);
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        mQuery = mDatabase.child("systems").orderByChild("user")
-                .equalTo(FirebaseAuth.getInstance().getUid());
-        mQuery.addValueEventListener(this);
-        mLightSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                int checkedInteger = isChecked ? 1 : 0;
-                mDatabase.child("systems/" + childString + "/control/turn_lights").setValue(checkedInteger);
-            }
-        });
-        mNutrientsSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                int checkedInteger = isChecked ? 1 : 0;
-                mDatabase.child("systems/" + childString + "/control/drop_nutriments").setValue(checkedInteger);
-            }
-        });
+
+        mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null) {
+            mainActivity.getRepoInstance().addOnDatabaseUpdateListener(this);
+        }
+
+        mLightSwitch.setOnCheckedChangeListener(this);
+        mNutrientsSwitch.setOnCheckedChangeListener(this);
     }
 
     @Override
-    public void onDataChange(DataSnapshot dataSnapshot) {
-        DataSnapshot sensorData = null;
-        for (DataSnapshot issue : dataSnapshot.getChildren()) {
-            childString = issue.getKey();
-            sensorData = issue.child("control");
-        }
-        Integer dropNutrients = null;
-        if (sensorData != null) {
-            dropNutrients = sensorData.child("drop_nutriments").getValue(Integer.class);
-        }
+    public void onDatabaseUpdate() {
+        currentSystem = mainActivity.getRepoInstance().getSystemAt(mainActivity.getCurrentSystemIndex());
+
+        Integer dropNutrients = currentSystem.getDropNutrients();
+        mNutrientsSwitch.setOnCheckedChangeListener(null);
+        mLightSwitch.setOnCheckedChangeListener(null);
         if (dropNutrients != null) {
-            if (dropNutrients == 1)
-                mNutrientsSwitch.setChecked(true);
-            else
-                mNutrientsSwitch.setChecked(false);
+            mNutrientsSwitch.setEnabled(true);
+            mNutrientsSwitch.setChecked(dropNutrients == 1);
+            mNutrientsSwitch.setOnCheckedChangeListener(this);
+        } else {
+            mNutrientsSwitch.setChecked(false);
+            mNutrientsSwitch.setEnabled(false);
         }
-        Integer turnLights = null;
-        if (sensorData != null) {
-            turnLights = sensorData.child("turn_lights").getValue(Integer.class);
-        }
+        Integer turnLights = currentSystem.getTurnLights();
         if (turnLights != null) {
-            if (turnLights == 1)
-                mLightSwitch.setChecked(true);
-            else
-                mLightSwitch.setChecked(false);
+            mLightSwitch.setEnabled(true);
+            mLightSwitch.setChecked(turnLights == 1);
+            mLightSwitch.setOnCheckedChangeListener(this);
+        } else {
+            mLightSwitch.setChecked(false);
+            mLightSwitch.setEnabled(false);
         }
     }
 
-    @Override
-    public void onCancelled(DatabaseError databaseError) {
-        Log.w(TAG, "Failed to read values.", databaseError.toException());
-        Toast.makeText(getActivity(), "Connection error", Toast.LENGTH_SHORT).show();
-    }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mQuery.removeEventListener(this);
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        int checkedInteger = isChecked ? 1 : 0;
+        switch (buttonView.getId())
+        {
+            case R.id.light_switch:
+                if (currentSystem != null)
+                    currentSystem.updateTurnLights(checkedInteger);
+                break;
+            case R.id.nutrients_switch:
+                if (currentSystem != null)
+                    currentSystem.updateDropNutrients(checkedInteger);
+                break;
+        }
     }
 }

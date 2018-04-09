@@ -17,10 +17,12 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import java.util.Collections;
 import java.util.List;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements SystemDataRepo.OnDatabaseUpdateListener {
 
     private static final String TAG = "LoginActivity";
     private static int RC_SIGN_IN = 100;
+    private SystemDataRepo dataRepo;
+    private String userEmail;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -43,8 +45,15 @@ public class LoginActivity extends AppCompatActivity {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             MyFirebaseInstanceIDService.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
-            signIn(currentUser.getEmail());
+            userEmail = currentUser.getEmail();
+            signIn();
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        dataRepo.removeOnDatabaseUpdateListener(this);
     }
 
     private void openFirebaseLoginUI()
@@ -71,7 +80,8 @@ public class LoginActivity extends AppCompatActivity {
                 // Successfully signed in
                 if (response != null) {
                     MyFirebaseInstanceIDService.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
-                    signIn(response.getEmail());
+                    userEmail = response.getEmail();
+                    signIn();
                 }
             }
             else {
@@ -80,9 +90,17 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void signIn(String currentUserEmail)
+    private void signIn()
     {
-        Toast.makeText(this, "Signed in as " + currentUserEmail, Toast.LENGTH_SHORT).show();
+        dataRepo = SystemDataRepo.getInstance();
+        dataRepo.initRepo();
+        dataRepo.addOnDatabaseUpdateListener(this);
+    }
+
+    @Override
+    public void onDatabaseUpdate() {
+        dataRepo.removeOnDatabaseUpdateListener(this);
+        Toast.makeText(this, "Signed in as " + userEmail, Toast.LENGTH_SHORT).show();
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }

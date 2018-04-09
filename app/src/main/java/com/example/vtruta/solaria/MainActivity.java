@@ -19,6 +19,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,10 +33,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.List;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity
-        implements LogoutDialogFragment.LoginDialogListener {
+        implements LogoutDialogFragment.LoginDialogListener, AdapterView.OnItemSelectedListener {
 
     private ActionBar actionBar;
     private MainAdapter mAdapter;
@@ -46,20 +51,26 @@ public class MainActivity extends AppCompatActivity
     private DrawerLayout.DrawerListener mDrawerLayoutListener;
     private TabLayout.OnTabSelectedListener mTabLayoutSelectedListener;
 
+    private Spinner mSystemsSpinner;
+
+    private SystemDataRepo mRepoInstance;
+    private int currentSystemIndex = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mRepoInstance = SystemDataRepo.getInstance();
+        loadTabs();
         loadDrawer();
         setUserDataDrawer();
         loadToolbar();
-        loadTabs();
     }
 
     @Override
     protected void onStart() {
-        //todo: update views to accomodate settings results code here, above super (i guess?)
+        loadSpinnerData();
         super.onStart();
     }
 
@@ -68,6 +79,50 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
         mDrawerLayout.removeDrawerListener(mDrawerLayoutListener);
         mTabLayout.removeOnTabSelectedListener(mTabLayoutSelectedListener);
+    }
+
+    private void loadSpinnerData()
+    {
+        List<String> systemNamesList = mRepoInstance.getAllSystemNames();
+        if (systemNamesList.size() > 0) {
+            mSystemsSpinner.setEnabled(true);
+            String[] systemNamesArray = new String[systemNamesList.size()];
+            systemNamesArray = systemNamesList.toArray(systemNamesArray);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
+                    systemNamesArray);
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            mSystemsSpinner.setAdapter(adapter);
+            mSystemsSpinner.setOnItemSelectedListener(this);
+        } else {
+            mSystemsSpinner.setEnabled(false);
+            ActionBar actionBar = getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.setTitle("No Systems");
+            }
+        }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        // An item was selected. You can retrieve the selected item using
+        // parent.getItemAtPosition(pos)
+        currentSystemIndex = position;
+        StatusFragment statusFragment = (StatusFragment)getSupportFragmentManager()
+                .findFragmentByTag("android:switcher:" + R.id.fragment_pager + ":" + "0");
+        ControlFragment controlFragment = (ControlFragment)getSupportFragmentManager()
+                .findFragmentByTag("android:switcher:" + R.id.fragment_pager + ":" + "1");
+
+        statusFragment.onDatabaseUpdate();
+        controlFragment.onDatabaseUpdate();
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(mRepoInstance.getSystemAt(currentSystemIndex).getName());
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 
     private void loadDrawer() {
@@ -130,6 +185,7 @@ public class MainActivity extends AppCompatActivity
             String email = mUser.getEmail();
             TextView userEmail = hView.findViewById(R.id.user_email);
             userEmail.setText(email);
+            mSystemsSpinner = hView.findViewById(R.id.current_system_spinner);
         }
     }
 
@@ -185,6 +241,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoginDialogPositiveClick() {
+        mRepoInstance.removeAllListeners();
         signOutFirebase();
     }
 
@@ -234,5 +291,13 @@ public class MainActivity extends AppCompatActivity
                     return null;
             }
         }
+    }
+
+    public int getCurrentSystemIndex() {
+        return currentSystemIndex;
+    }
+
+    public SystemDataRepo getRepoInstance() {
+        return mRepoInstance;
     }
 }
