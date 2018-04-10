@@ -40,20 +40,17 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class MainActivity extends AppCompatActivity
         implements LogoutDialogFragment.LoginDialogListener, AdapterView.OnItemSelectedListener {
 
-    private ActionBar actionBar;
-    private MainAdapter mAdapter;
     private TabLayout mTabLayout;
     private ViewPager mPager;
     private DrawerLayout mDrawerLayout;
     private NavigationView mNavigationView;
     private Toolbar mToolbar;
-    private FirebaseUser mUser;
+    private Spinner mSystemsSpinner;
+    private SystemDataRepo mRepoInstance;
     private DrawerLayout.DrawerListener mDrawerLayoutListener;
     private TabLayout.OnTabSelectedListener mTabLayoutSelectedListener;
 
-    private Spinner mSystemsSpinner;
-
-    private SystemDataRepo mRepoInstance;
+    private static final String CURRENT_SYSTEM_INDEX = "currentSystemIndex";
     private int currentSystemIndex = 0;
 
     @Override
@@ -170,7 +167,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setUserDataDrawer() {
-        mUser = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         if (mUser != null) {
             View hView = mNavigationView.getHeaderView(0);
             Uri photoUrl = mUser.getPhotoUrl();
@@ -192,7 +189,7 @@ public class MainActivity extends AppCompatActivity
     private void loadToolbar() {
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
-        actionBar = getSupportActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
@@ -200,7 +197,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadTabs() {
-        mAdapter = new MainAdapter(getSupportFragmentManager());
+        MainAdapter mAdapter = new MainAdapter(getSupportFragmentManager());
         mPager = findViewById(R.id.fragment_pager);
         mPager.setAdapter(mAdapter);
 

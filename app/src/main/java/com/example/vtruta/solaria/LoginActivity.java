@@ -85,7 +85,7 @@ public class LoginActivity extends AppCompatActivity implements SystemDataRepo.O
                 }
             }
             else {
-                Toast.makeText(this, "Connection error.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Connection refused.", Toast.LENGTH_SHORT).show();
             }
         }
     }

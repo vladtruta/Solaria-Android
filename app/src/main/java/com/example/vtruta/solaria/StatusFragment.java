@@ -22,9 +22,9 @@ public class StatusFragment extends Fragment implements SystemDataRepo.OnDatabas
     private TextView mLightLevelTV;
     private TextView mHumidityTV;
     private TextView mPhTV;
-    private SystemData currentSystem;
-    private DecimalFormat decFormat;
-    private MainActivity mainActivity;
+    private SystemData mCurrentSystem;
+    private DecimalFormat mDecFormat;
+    private MainActivity mParentActivity;
 
     public StatusFragment() { }
 
@@ -45,7 +45,7 @@ public class StatusFragment extends Fragment implements SystemDataRepo.OnDatabas
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        decFormat = new DecimalFormat("#");
+        mDecFormat = new DecimalFormat("#");
 
         mAirTempTV = view.findViewById(R.id.air_temp_tv);
         mWaterTempTV = view.findViewById(R.id.water_temp_tv);
@@ -54,56 +54,71 @@ public class StatusFragment extends Fragment implements SystemDataRepo.OnDatabas
         mHumidityTV = view.findViewById(R.id.humidity_tv);
         mPhTV = view.findViewById(R.id.ph_tv);
 
-        mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            mainActivity.getRepoInstance().addOnDatabaseUpdateListener(this);
+        mParentActivity = (MainActivity) getActivity();
+        if (mParentActivity != null) {
+            mParentActivity.getRepoInstance().addOnDatabaseUpdateListener(this);
+            if (mParentActivity.getRepoInstance().getAllSystemNames().size() == 0)
+                disableAll();
         }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mainActivity.getRepoInstance().removeOnDatabaseUpdateListener(this);
+        mParentActivity.getRepoInstance().removeOnDatabaseUpdateListener(this);
     }
 
     @Override
     public void onDatabaseUpdate() {
-        currentSystem = mainActivity.getRepoInstance().getSystemAt(mainActivity.getCurrentSystemIndex());
-        Double airTemp = currentSystem.getAirTemp();
+        mCurrentSystem = mParentActivity.getRepoInstance().getSystemAt(mParentActivity.getCurrentSystemIndex());
+        if (mCurrentSystem == null) {
+            disableAll();
+            return;
+        }
+        Double airTemp = mCurrentSystem.getAirTemp();
         if (airTemp != null) {
-            mAirTempTV.setText(String.valueOf(decFormat.format(airTemp)) + "°C");
+            mAirTempTV.setText(String.valueOf(mDecFormat.format(airTemp)) + "°C");
         } else {
             mAirTempTV.setText("...");
         }
-        Double waterTemp = currentSystem.getWaterTemp();
+        Double waterTemp = mCurrentSystem.getWaterTemp();
         if (waterTemp != null) {
-            mWaterTempTV.setText(String.valueOf(decFormat.format(waterTemp)) + "°C");
+            mWaterTempTV.setText(String.valueOf(mDecFormat.format(waterTemp)) + "°C");
         } else {
             mWaterTempTV.setText("...");
         }
-        String lightStatus = currentSystem.getLightStatus();
+        String lightStatus = mCurrentSystem.getLightStatus();
         if (lightStatus != null) {
             mLightLevelTV.setText(lightStatus);
         } else {
             mLightLevelTV.setText("...");
         }
-        Double waterLevel = currentSystem.getWaterLevel();
+        Double waterLevel = mCurrentSystem.getWaterLevel();
         if (waterLevel != null) {
-            mWaterLevelTV.setText(String.valueOf(decFormat.format(waterLevel)) + "%");
+            mWaterLevelTV.setText(String.valueOf(mDecFormat.format(waterLevel)) + "%");
         } else {
             mWaterLevelTV.setText("...");
         }
-        Double pH = currentSystem.getpH();
+        Double pH = mCurrentSystem.getpH();
         if (pH != null) {
-            mPhTV.setText(String.valueOf(decFormat.format(pH)));
+            mPhTV.setText(String.valueOf(mDecFormat.format(pH)));
         } else {
             mPhTV.setText("...");
         }
-        Double humidity = currentSystem.getHumidity();
+        Double humidity = mCurrentSystem.getHumidity();
         if (humidity != null) {
-            mHumidityTV.setText(String.valueOf(decFormat.format(humidity)) + "%");
+            mHumidityTV.setText(String.valueOf(mDecFormat.format(humidity)) + "%");
         } else {
             mHumidityTV.setText("...");
         }
+    }
+
+    private void disableAll() {
+        mAirTempTV.setText("...");
+        mWaterTempTV.setText("...");
+        mLightLevelTV.setText("...");
+        mWaterLevelTV.setText("...");
+        mPhTV.setText("...");
+        mHumidityTV.setText("...");
     }
 }

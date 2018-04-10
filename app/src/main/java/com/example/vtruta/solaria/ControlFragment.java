@@ -36,30 +36,34 @@ public class ControlFragment extends Fragment implements SystemDataRepo.OnDataba
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mLightSwitch = view.findViewById(R.id.light_switch);
+        mNutrientsSwitch = view.findViewById(R.id.nutrients_switch);
+        mLightSwitch.setOnCheckedChangeListener(this);
+        mNutrientsSwitch.setOnCheckedChangeListener(this);
+
+        mainActivity = (MainActivity) getActivity();
+        if (mainActivity != null) {
+            mainActivity.getRepoInstance().addOnDatabaseUpdateListener(this);
+            if (mainActivity.getRepoInstance().getAllSystemNames().size() == 0)
+                disableAll();
+        }
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         mainActivity.getRepoInstance().removeOnDatabaseUpdateListener(this);
     }
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mLightSwitch = view.findViewById(R.id.light_switch);
-        mNutrientsSwitch = view.findViewById(R.id.nutrients_switch);
-
-        mainActivity = (MainActivity) getActivity();
-        if (mainActivity != null) {
-            mainActivity.getRepoInstance().addOnDatabaseUpdateListener(this);
-        }
-
-        mLightSwitch.setOnCheckedChangeListener(this);
-        mNutrientsSwitch.setOnCheckedChangeListener(this);
-    }
-
-    @Override
     public void onDatabaseUpdate() {
         currentSystem = mainActivity.getRepoInstance().getSystemAt(mainActivity.getCurrentSystemIndex());
-
+        if (currentSystem == null) {
+            disableAll();
+            return;
+        }
         Integer dropNutrients = currentSystem.getDropNutrients();
         mNutrientsSwitch.setOnCheckedChangeListener(null);
         mLightSwitch.setOnCheckedChangeListener(null);
@@ -67,7 +71,7 @@ public class ControlFragment extends Fragment implements SystemDataRepo.OnDataba
             mNutrientsSwitch.setEnabled(true);
             mNutrientsSwitch.setChecked(dropNutrients == 1);
             mNutrientsSwitch.setOnCheckedChangeListener(this);
-        } else {
+        } else { // Small chances for the code to reach these else blocks, but still good for safety
             mNutrientsSwitch.setChecked(false);
             mNutrientsSwitch.setEnabled(false);
         }
@@ -80,6 +84,13 @@ public class ControlFragment extends Fragment implements SystemDataRepo.OnDataba
             mLightSwitch.setChecked(false);
             mLightSwitch.setEnabled(false);
         }
+    }
+
+    private void disableAll() {
+        mNutrientsSwitch.setChecked(false);
+        mNutrientsSwitch.setEnabled(false);
+        mLightSwitch.setChecked(false);
+        mLightSwitch.setEnabled(false);
     }
 
 

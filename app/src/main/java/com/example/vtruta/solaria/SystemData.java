@@ -117,4 +117,16 @@ public class SystemData {
     public void updateDropNutrients(int value) {
         mDatabase.child("systems/" + rootName + "/control/drop_nutriments").setValue(value);
     }
+
+    public void updateUserID(String value) {
+        mDatabase.child("systems/" + rootName + "/user").setValue(value);
+    }
+
+    public void updateName(String value) {
+        mDatabase.child("systems/" + rootName + "/name").setValue(value.trim());
+    }
+
+    public void removeUserDatabase() {
+        mDatabase.child("systems/" + rootName + "/user").removeValue();
+    }
 }
