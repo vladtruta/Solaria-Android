@@ -22,7 +22,6 @@ public class DialogManagePreference extends DialogPreference implements TextView
     }
 
     private int mPreferenceListIndex;
-
     private EditText mDeviceNameET;
     private OnManageDialogChangeListener mListener;
 
