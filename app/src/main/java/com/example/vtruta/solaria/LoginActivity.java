@@ -50,12 +50,6 @@ public class LoginActivity extends AppCompatActivity implements SystemDataRepo.O
         }
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        dataRepo.removeOnDatabaseUpdateListener(this);
-    }
-
     private void openFirebaseLoginUI()
     {
         List<AuthUI.IdpConfig> providers = Collections.singletonList(

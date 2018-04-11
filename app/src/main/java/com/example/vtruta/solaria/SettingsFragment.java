@@ -2,8 +2,12 @@ package com.example.vtruta.solaria;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
+import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,39 +19,47 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
 
 public class SettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener,
         Preference.OnPreferenceClickListener, DialogManagePreference.OnManageDialogChangeListener,
         SystemDataRepo.OnPairSystemResultListener, DialogPairPreference.OnPairDialogCloseListener {
+    private static final String TAG = "SettingsFragment";
 
     public static final String KEY_PREF_MANUAL_PAIR = "key_pref_manual_pair";
     public static final String KEY_PREF_REFRESH = "key_pref_refresh";
-
-    private static final int REQUEST_ENABLE_BT = 66;
-
-    private BluetoothAdapter mBluetoothAdapter;
-    private int mPairedDeviceIndex;
-    private boolean mScanning;
-    private Handler mHandler;
-    private static final long SCAN_PERIOD = 10000; // 10 seconds
-    private BluetoothAdapter.LeScanCallback mLeScanCallback;
-
-    private BroadcastReceiver mGattUpdateReceiver;
 
     private String mFragmentToLaunch;
     private PreferenceCategory preferenceCategory;
     private Preference mRefreshPref;
     private SystemDataRepo mDatabaseRepo;
     private List<SystemData> mSystemsList;
+
+    // BLUETOOTH
+    private static final int REQUEST_ENABLE_BT = 66;
+    private UUID serviceUUID = UUID.fromString("0a1fe100-fb28-4e8c-afa0-21b036da5900");
+    private UUID characteristicUUID = UUID.fromString("0a1fe100-fb28-4e8c-afa0-21b036da5901");
+    private static final long SCAN_PERIOD = 10000; // 10 seconds
+
+    private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothGatt mBluetoothGatt;
+    private List<BluetoothDevice> bluetoothDevices;
+    private BluetoothAdapter.LeScanCallback mLeScanCallback;
+    private BluetoothGattCallback mBluetoothGattCallback;
+    private Handler mHandler;
+    private int mPairedDeviceIndex;
+    private boolean mScanning;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,9 +80,10 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
             mManualPairETPref.setOnPreferenceChangeListener(this);
             mDatabaseRepo.setOnReceivePairSystemResultListener(this);
             mRefreshPref = findPreference(KEY_PREF_REFRESH);
+            mRefreshPref.setTitle("Refresh");
             mRefreshPref.setOnPreferenceClickListener(this);
             preferenceCategory = (PreferenceCategory) findPreference("pref_devices_nearby");
-            mHandler = new Handler();
+            bluetoothDevices = new ArrayList<>();
         }
     }
 
@@ -83,25 +96,21 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 mRefreshPref.setEnabled(false);
                 preferenceCategory.setEnabled(false);
             } else {
+                loadBluetoothPairCallbacks();
                 mRefreshPref.setEnabled(true);
                 preferenceCategory.setEnabled(true);
-                mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
-                    @Override
-                    public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                        getActivity().runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                //TODO: set access code when scanning
-                                addPairDeviceToCategory(device.getName(), mPairedDeviceIndex, "nocode");
-                                mPairedDeviceIndex++;
-                            }
-                        });
-                    }
-                };
                 checkBluetoothEnabled();
             }
         }
         return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mBluetoothAdapter != null)
+            scanLeDevice(false);
+        closeGatt();
     }
 
     /* -- MANAGING --- */
@@ -218,12 +227,62 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
     public void onPairDialogPreferenceClose(int result, DialogPairPreference pref) {
         switch (result) {
             case DialogInterface.BUTTON_POSITIVE:
-                mDatabaseRepo.querySystemWithAccessCode(pref.getAccessCode());
+                BluetoothDevice currentDevice = bluetoothDevices.get(pref.getIndex());
+                closeGatt();
+                mBluetoothGatt = currentDevice.connectGatt(getActivity(), false, mBluetoothGattCallback);
                 break;
         }
     }
 
-    private void addPairDeviceToCategory(String name, int index, String accessCode) {
+    private void loadBluetoothPairCallbacks()
+    {
+        mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
+            @Override
+            public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (bluetoothDevices.indexOf(device) == -1) {
+                            bluetoothDevices.add(device);
+                            addPairDeviceToCategory(device.getName(), mPairedDeviceIndex);
+                            mPairedDeviceIndex++;
+                        }
+                    }
+                });
+            }
+        };
+        mBluetoothGattCallback = new BluetoothGattCallback() {
+            @Override
+            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+                super.onConnectionStateChange(gatt, status, newState);
+                if (newState == BluetoothProfile.STATE_CONNECTED){
+                    gatt.discoverServices();
+                }
+            }
+
+            @Override
+            public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+                super.onServicesDiscovered(gatt, status);
+
+                if (status != BluetoothGatt.GATT_SUCCESS) {
+                    Log.w(TAG, "onServicesDiscovered received: " + status);
+                    return;
+                }
+                BluetoothGattService service = gatt.getService(serviceUUID);
+                BluetoothGattCharacteristic characteristic = service.getCharacteristic(characteristicUUID);
+                mBluetoothGatt.readCharacteristic(characteristic);
+            }
+
+            @Override
+            public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+                super.onCharacteristicRead(gatt, characteristic, status);
+                String accessCodeString = characteristic.getStringValue(0);
+                mDatabaseRepo.querySystemWithAccessCode(accessCodeString);
+            }
+        };
+    }
+
+    private void addPairDeviceToCategory(String name, int index) {
         DialogPairPreference pref;
 
         pref = new DialogPairPreference(getActivity(), null);
@@ -231,11 +290,12 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         pref.setTitle(name);
         pref.setDialogTitle("Pair " + name);
         pref.setOnPairDialogCloseListener(this);
-        pref.setAccessCode(accessCode);
+        pref.setIndex(index);
         preferenceCategory.addPreference(pref);
     }
 
     private void scanLeDevice(final boolean enable) {
+        mHandler = new Handler();
         if (enable) {
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
@@ -243,16 +303,30 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
                 public void run() {
                     mScanning = false;
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    mRefreshPref.setTitle("Refresh");
                 }
             }, SCAN_PERIOD);
 
-            preferenceCategory.removeAll();
             mPairedDeviceIndex = 0;
+            preferenceCategory.removeAll();
+            bluetoothDevices.clear();
+
             mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            UUID[] array = { serviceUUID };
+            mBluetoothAdapter.startLeScan(array, mLeScanCallback);
+            mRefreshPref.setTitle("Scanning...");
         } else {
             mScanning = false;
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            mRefreshPref.setTitle("Refresh");
         }
+    }
+
+    private void closeGatt() {
+        if (mBluetoothGatt == null) {
+            return;
+        }
+        mBluetoothGatt.close();
+        mBluetoothGatt = null;
     }
 }

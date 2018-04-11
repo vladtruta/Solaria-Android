@@ -12,6 +12,7 @@ class DialogPairPreference extends DialogPreference {
     }
 
     String accessCode;
+    int index;
     private OnPairDialogCloseListener mListener;
 
     DialogPairPreference(Context context, AttributeSet attrs) {
@@ -37,5 +38,13 @@ class DialogPairPreference extends DialogPreference {
 
     public String getAccessCode() {
         return accessCode;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return index;
     }
 }
