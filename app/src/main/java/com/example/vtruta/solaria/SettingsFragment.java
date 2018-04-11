@@ -110,6 +110,7 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         super.onStop();
         if (mBluetoothAdapter != null)
             scanLeDevice(false);
+        // Closes the Gatt Server
         closeGatt();
     }
 
