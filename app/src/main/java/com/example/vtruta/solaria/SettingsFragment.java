@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -254,10 +255,15 @@ public class SettingsFragment extends PreferenceFragment implements Preference.O
         };
         mBluetoothGattCallback = new BluetoothGattCallback() {
             @Override
-            public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            public void onConnectionStateChange(final BluetoothGatt gatt, int status, int newState) {
                 super.onConnectionStateChange(gatt, status, newState);
                 if (newState == BluetoothProfile.STATE_CONNECTED){
-                    gatt.discoverServices();
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            gatt.discoverServices();
+                        }
+                    });
                 }
             }
 
