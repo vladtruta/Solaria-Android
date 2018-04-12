@@ -1,4 +1,4 @@
-package com.example.vtruta.solaria;
+package com.example.vtruta.solaria.fragments;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -11,23 +11,13 @@ import android.support.v7.app.AlertDialog;
 
 public class LogoutDialogFragment extends DialogFragment {
 
-    public interface LoginDialogListener {
-        void onLoginDialogPositiveClick();
+    private static final String TAG = "LogoutDialogFragment";
+
+    public interface LogoutDialogListener {
+        void onLogoutDialogPositiveClick();
     }
 
-    private LoginDialogListener mListener;
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        try {
-            mListener = (LoginDialogListener) context;
-        } catch (ClassCastException e) {
-            // The activity doesn't implement the interface, throw exception
-            throw new ClassCastException(context.toString()
-                    + " must implement NoticeDialogListener");
-        }
-    }
+    private LogoutDialogListener logoutDialogListener;
 
     @NonNull
     @Override
@@ -41,7 +31,7 @@ public class LogoutDialogFragment extends DialogFragment {
         builder.setMessage("You will be signed out.")
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        mListener.onLoginDialogPositiveClick();
+                        logoutDialogListener.onLogoutDialogPositiveClick();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -50,5 +40,9 @@ public class LogoutDialogFragment extends DialogFragment {
                     }
                 });
         return builder.create();
+    }
+
+    public void setLogoutDialogListener(LogoutDialogListener logoutDialogListener) {
+        this.logoutDialogListener = logoutDialogListener;
     }
 }

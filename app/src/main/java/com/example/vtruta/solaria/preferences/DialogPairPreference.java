@@ -1,21 +1,23 @@
-package com.example.vtruta.solaria;
+package com.example.vtruta.solaria.preferences;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 
-class DialogPairPreference extends DialogPreference {
-    public interface OnPairDialogCloseListener
-    {
+public class DialogPairPreference extends DialogPreference {
+
+    private static final String TAG = "DialogPairPreference";
+
+    public interface OnPairDialogCloseListener {
         void onPairDialogPreferenceClose(int result, DialogPairPreference pref);
     }
 
-    String accessCode;
-    int index;
-    private OnPairDialogCloseListener mListener;
+    private int index;
 
-    DialogPairPreference(Context context, AttributeSet attrs) {
+    private OnPairDialogCloseListener pairDialogCloseListener;
+
+    public DialogPairPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         setPositiveButtonText("Pair");
         setNegativeButtonText("Cancel");
@@ -25,19 +27,11 @@ class DialogPairPreference extends DialogPreference {
     @Override
     public void onClick(DialogInterface dialog, int which) {
         super.onClick(dialog, which);
-        mListener.onPairDialogPreferenceClose(which, this);
+        pairDialogCloseListener.onPairDialogPreferenceClose(which, this);
     }
 
     public void setOnPairDialogCloseListener(OnPairDialogCloseListener listener) {
-        this.mListener = listener;
-    }
-
-    public void setAccessCode(String accessCode) {
-        this.accessCode = accessCode;
-    }
-
-    public String getAccessCode() {
-        return accessCode;
+        this.pairDialogCloseListener = listener;
     }
 
     public void setIndex(int index) {
