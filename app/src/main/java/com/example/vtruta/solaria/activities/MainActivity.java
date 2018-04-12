@@ -26,11 +26,11 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.vtruta.solaria.R;
+import com.example.vtruta.solaria.database.SystemDataRepo;
 import com.example.vtruta.solaria.fragments.ControlFragment;
 import com.example.vtruta.solaria.fragments.LogoutDialogFragment;
-import com.example.vtruta.solaria.R;
 import com.example.vtruta.solaria.fragments.StatusFragment;
-import com.example.vtruta.solaria.database.SystemDataRepo;
 import com.example.vtruta.solaria.fragments.ThresholdFragment;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadFields() {
         mPager = findViewById(R.id.fragment_pager);
+        mPager.setOffscreenPageLimit(3);
         mTabLayout = findViewById(R.id.tab_layout);
         mDrawerLayout = findViewById(R.id.drawer_layout);
         mNavigationView = findViewById(R.id.nav_view);
@@ -153,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 mPager.setCurrentItem(tab.getPosition());
-                systemDataRepo.notifyListenersUpdateData();
             }
 
             @Override

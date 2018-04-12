@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:scrollbars="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -9,7 +10,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
+        <android.support.v7.widget.AppCompatTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Set the limits for which to receive warning notifications:"
@@ -19,9 +20,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Air Temp" />
@@ -31,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/threshold_air_temp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -39,7 +41,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <SeekBar
+        <android.support.v7.widget.AppCompatSeekBar
             android:id="@+id/air_temp_sb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,9 +50,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Water Temp" />
@@ -60,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/threshold_water_temp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -68,7 +71,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <SeekBar
+        <android.support.v7.widget.AppCompatSeekBar
             android:id="@+id/water_temp_sb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,9 +80,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Water Level" />
@@ -89,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/threshold_water_level"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,7 +101,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <SeekBar
+        <android.support.v7.widget.AppCompatSeekBar
             android:id="@+id/water_level_sb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -106,9 +110,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Humidity" />
@@ -118,7 +123,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/threshold_humidity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -126,7 +131,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <SeekBar
+        <android.support.v7.widget.AppCompatSeekBar
             android:id="@+id/humidity_sb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -135,9 +140,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="pH" />
@@ -147,7 +153,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1" />
 
-            <TextView
+            <android.support.v7.widget.AppCompatTextView
                 android:id="@+id/threshold_ph"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -155,7 +161,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <SeekBar
+        <android.support.v7.widget.AppCompatSeekBar
             android:id="@+id/ph_sb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

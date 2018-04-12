@@ -79,21 +79,21 @@ public class ControlFragment extends Fragment {
                     Integer dropNutrients = currentSystem.getDropNutrients();
                     mNutrientsSwitch.setEnabled(true);
                     mNutrientsSwitch.setChecked(dropNutrients == 1);
-                    mNutrientsSwitch.setOnCheckedChangeListener(checkedChangeListener);
                 } catch (Exception exc) {
                     mNutrientsSwitch.setChecked(false);
                     mNutrientsSwitch.setEnabled(false);
                 }
+                mNutrientsSwitch.setOnCheckedChangeListener(checkedChangeListener);
                 mLightSwitch.setOnCheckedChangeListener(null);
                 try {
                     Integer turnLights = currentSystem.getTurnLights();
                     mLightSwitch.setEnabled(true);
                     mLightSwitch.setChecked(turnLights == 1);
-                    mLightSwitch.setOnCheckedChangeListener(checkedChangeListener);
                 } catch (Exception exc) {
                     mLightSwitch.setChecked(false);
                     mLightSwitch.setEnabled(false);
                 }
+                mLightSwitch.setOnCheckedChangeListener(checkedChangeListener);
             }
         };
         systemDataRepo.addOnDatabaseUpdateListener(databaseUpdateListener);

@@ -24,7 +24,7 @@ public class ThresholdFragment extends Fragment {
 
     private static final String TAG = "ThresholdFragment";
 
-    private SystemDataRepo.OnDatabaseUpdateListener databaseUpdateListener;
+    private SystemDataRepo.OnThresholdUpdateValuesListener thresholdUpdateValuesListener;
 
     private static final int AIR_TEMP_MIN = -5;
     private static final int AIR_TEMP_MAX = 40;
@@ -71,6 +71,20 @@ public class ThresholdFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         loadFields(view);
         setListeners();
+        if (savedInstanceState == null)
+            thresholdUpdateValuesListener.onThresholdUpdateValues();
+        else
+            restoreSensorData(savedInstanceState);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("air_temp", mAirTempSB.getProgress());
+        outState.putInt("water_temp", mWaterTempSB.getProgress());
+        outState.putInt("water_level", mWaterLevelSB.getProgress());
+        outState.putInt("humidity", mHumiditySB.getProgress());
+        outState.putInt("ph", mPhSB.getProgress());
     }
 
     @Override
@@ -89,7 +103,7 @@ public class ThresholdFragment extends Fragment {
                 Toast.makeText(getActivity(), "Success: Limits saved successfully!", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_revert_threshold:
-                databaseUpdateListener.onDatabaseUpdate();
+                thresholdUpdateValuesListener.onThresholdUpdateValues();
                 Toast.makeText(getActivity(), "Revert: Reverted to original limits.", Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -116,12 +130,10 @@ public class ThresholdFragment extends Fragment {
         decimalFormat = new DecimalFormat("#");
         mainActivity = (MainActivity) getActivity();
         systemDataRepo = SystemDataRepo.getInstance();
-        if (systemDataRepo.getAllSystemNames().isEmpty())
-            disableAll();
     }
 
     private void setListeners() {
-        SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        final SeekBar.OnSeekBarChangeListener seekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 switch (seekBar.getId()) {
@@ -159,9 +171,9 @@ public class ThresholdFragment extends Fragment {
         mHumiditySB.setOnSeekBarChangeListener(seekBarChangeListener);
         mPhSB.setOnSeekBarChangeListener(seekBarChangeListener);
 
-        databaseUpdateListener = new SystemDataRepo.OnDatabaseUpdateListener() {
+        thresholdUpdateValuesListener = new SystemDataRepo.OnThresholdUpdateValuesListener() {
             @Override
-            public void onDatabaseUpdate() {
+            public void onThresholdUpdateValues() {
                 try {
                     Double airTempThreshold = systemDataRepo.getAirTempThreshold();
                     mAirTempSB.setEnabled(true);
@@ -214,34 +226,36 @@ public class ThresholdFragment extends Fragment {
                 }
             }
         };
-        systemDataRepo.addOnDatabaseUpdateListener(databaseUpdateListener);
+        systemDataRepo.setThresholdUpdateValuesListener(thresholdUpdateValuesListener);
     }
 
     private void updateAllThresholds() {
-        systemDataRepo.removeOnDatabaseUpdateListener(databaseUpdateListener);
+        systemDataRepo.setThresholdUpdateValuesListener(null);
         systemDataRepo.updateAirTempThreshold((double) mAirTempSB.getProgress() + AIR_TEMP_MIN);
         systemDataRepo.updateWaterTempThreshold((double) mWaterTempSB.getProgress() + WATER_TEMP_MIN);
         systemDataRepo.updateWaterLevelThreshold((double) mWaterLevelSB.getProgress() + WATER_LEVEL_MIN);
         systemDataRepo.updateHumidityThreshold((double) mHumiditySB.getProgress() + HUMIDITY_MIN);
         systemDataRepo.updatepHThreshold((double) mPhSB.getProgress() + PH_MIN);
-        systemDataRepo.addOnDatabaseUpdateListener(databaseUpdateListener);
+        systemDataRepo.setThresholdUpdateValuesListener(thresholdUpdateValuesListener);
     }
 
-    private void disableAll() {
-        mAirTempSB.setProgress(0);
-        mWaterTempSB.setProgress(0);
-        mWaterLevelSB.setProgress(0);
-        mHumiditySB.setProgress(0);
-        mPhSB.setProgress(0);
-        mAirTempSB.setEnabled(false);
-        mWaterTempSB.setEnabled(false);
-        mWaterLevelSB.setEnabled(false);
-        mHumiditySB.setEnabled(false);
-        mPhSB.setEnabled(false);
-        mAirTempValueTV.setText("...");
-        mWaterTempValueTV.setText("...");
-        mWaterLevelValueTV.setText("...");
-        mHumidityValueTV.setText("...");
-        mPhValueTV.setText("...");
+    private void restoreSensorData(Bundle savedInstanceState) {
+        int airTemp = savedInstanceState.getInt("air_temp");
+        int waterTemp = savedInstanceState.getInt("water_temp");
+        int waterLevel = savedInstanceState.getInt("water_level");
+        int humidity = savedInstanceState.getInt("humidity");
+        int ph = savedInstanceState.getInt("ph");
+
+        mAirTempSB.setProgress(airTemp);
+        mWaterTempSB.setProgress(waterTemp);
+        mWaterLevelSB.setProgress(waterLevel);
+        mHumiditySB.setProgress(humidity);
+        mPhSB.setProgress(ph);
+
+        mAirTempValueTV.setText(String.valueOf(airTemp + AIR_TEMP_MIN) + "°C");
+        mWaterTempValueTV.setText(String.valueOf(waterTemp + WATER_TEMP_MIN) + "°C");
+        mWaterLevelValueTV.setText(String.valueOf(waterLevel + WATER_LEVEL_MIN) + "%");
+        mHumidityValueTV.setText(String.valueOf(humidity + HUMIDITY_MIN) + "%");
+        mPhValueTV.setText(String.valueOf(ph + PH_MIN));
     }
 }

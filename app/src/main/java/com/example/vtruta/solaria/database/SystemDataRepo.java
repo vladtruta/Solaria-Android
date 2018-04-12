@@ -24,10 +24,13 @@ public class SystemDataRepo {
         void OnReceivePairSystemResult(int resultCode, String systemName);
     }
 
+    public interface OnThresholdUpdateValuesListener {
+        void onThresholdUpdateValues();
+    }
+
     private static SystemDataRepo instance;
 
     private String uid;
-    private int dataChangeCount = 0;
 
     private Double airTempThreshold;
     private Double waterTempThreshold;
@@ -37,6 +40,7 @@ public class SystemDataRepo {
 
     private List<OnDatabaseUpdateListener> updateListenerList;
     private OnReceivePairSystemResultListener receivePairSystemResultListener;
+    private OnThresholdUpdateValuesListener thresholdUpdateValuesListener;
     private ValueEventListener querySystemListener;
     private ValueEventListener sensorDataListener;
     private ValueEventListener sensorThresholdListener;
@@ -113,7 +117,7 @@ public class SystemDataRepo {
                     userParamsDatabaseReference.child(uid).child("ph").setValue(7);
                     userParamsDatabaseReference.child(uid).child("humidity").setValue(70);
                 }
-                notifyListenersUpdateData();
+                thresholdUpdateValuesListener.onThresholdUpdateValues();
             }
 
             @Override
@@ -153,11 +157,8 @@ public class SystemDataRepo {
     }
 
     public void notifyListenersUpdateData() {
-        dataChangeCount++;
-        if (dataChangeCount >= 2) {
-            for (OnDatabaseUpdateListener list : updateListenerList) {
-                list.onDatabaseUpdate();
-            }
+        for (OnDatabaseUpdateListener list : updateListenerList) {
+            list.onDatabaseUpdate();
         }
     }
 
@@ -206,6 +207,10 @@ public class SystemDataRepo {
 
     public void setOnReceivePairSystemResultListener(OnReceivePairSystemResultListener listener) {
         this.receivePairSystemResultListener = listener;
+    }
+
+    public void setThresholdUpdateValuesListener(OnThresholdUpdateValuesListener thresholdUpdateValuesListener) {
+        this.thresholdUpdateValuesListener = thresholdUpdateValuesListener;
     }
 
     public SystemData getSystemAt(int index) {

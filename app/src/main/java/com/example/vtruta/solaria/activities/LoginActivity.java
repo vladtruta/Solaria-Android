@@ -25,12 +25,16 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int RC_SIGN_IN = 100;
 
+    private String userEmail;
+    private boolean sensorDataLoaded;
+    private boolean sensorThresholdLoaded;
+
     private SystemDataRepo.OnDatabaseUpdateListener databaseUpdateListener;
+    private SystemDataRepo.OnThresholdUpdateValuesListener thresholdUpdateValuesListener;
 
     private SignInButton mSignInButton;
 
     private SystemDataRepo systemDataRepo;
-    private String userEmail;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,12 +48,14 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        sensorDataLoaded = false;
+        sensorThresholdLoaded = false;
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             MyFirebaseInstanceIDService.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
             userEmail = currentUser.getEmail();
-            signIn();
+            startSignInProcedure();
         }
     }
 
@@ -62,10 +68,17 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onDatabaseUpdate() {
                 systemDataRepo.removeOnDatabaseUpdateListener(databaseUpdateListener);
-                Toast.makeText(getApplicationContext(), "Signed in as " + userEmail,
-                        Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(intent);
+                sensorDataLoaded = true;
+                trySignIn();
+            }
+        };
+
+        thresholdUpdateValuesListener = new SystemDataRepo.OnThresholdUpdateValuesListener() {
+            @Override
+            public void onThresholdUpdateValues() {
+                systemDataRepo.setThresholdUpdateValuesListener(null);
+                sensorThresholdLoaded = true;
+                trySignIn();
             }
         };
 
@@ -102,7 +115,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (response != null) {
                     MyFirebaseInstanceIDService.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
                     userEmail = response.getEmail();
-                    signIn();
+                    startSignInProcedure();
                 }
             } else {
                 Toast.makeText(this, "Connection refused.", Toast.LENGTH_SHORT).show();
@@ -110,9 +123,19 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void signIn() {
+    private void startSignInProcedure() {
         systemDataRepo = SystemDataRepo.getInstance();
         systemDataRepo.initRepo();
         systemDataRepo.addOnDatabaseUpdateListener(databaseUpdateListener);
+        systemDataRepo.setThresholdUpdateValuesListener(thresholdUpdateValuesListener);
+    }
+
+    private void trySignIn() {
+        if (sensorDataLoaded && sensorThresholdLoaded) {
+            Toast.makeText(getApplicationContext(), "Signed in as " + userEmail,
+                    Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            startActivity(intent);
+        }
     }
 }

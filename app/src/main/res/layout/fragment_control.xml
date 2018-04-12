@@ -11,40 +11,18 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <LinearLayout
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/light_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:orientation="horizontal">
+            android:text="Artificial Light"
+            android:layout_marginBottom="24dp"/>
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Artificial Light" />
-
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/light_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
+        <android.support.v7.widget.SwitchCompat
+            android:id="@+id/nutrients_switch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Nutrients" />
-
-            <android.support.v7.widget.SwitchCompat
-                android:id="@+id/nutrients_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+            android:text="Nutrients"/>
 
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>
