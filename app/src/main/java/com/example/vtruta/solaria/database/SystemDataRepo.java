@@ -193,7 +193,7 @@ public class SystemDataRepo {
     }
 
     public void querySystemWithAccessCode(String accessCode) {
-        final Query findSystemQuery = systemsDatabaseReference.child("systems").orderByChild("access_code")
+        final Query findSystemQuery = systemsDatabaseReference.orderByChild("access_code")
                 .equalTo(accessCode);
         findSystemQuery.addListenerForSingleValueEvent(querySystemListener);
     }
