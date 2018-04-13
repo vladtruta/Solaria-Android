@@ -93,14 +93,14 @@ public class LoginActivity extends AppCompatActivity {
 
     private void openFirebaseLoginUI() {
         List<AuthUI.IdpConfig> providers = Collections.singletonList(
-                new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build());
+                new AuthUI.IdpConfig.GoogleBuilder().build());
         startActivityForResult(
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setAvailableProviders(providers)
-                        .setLogo(R.drawable.logo_crop)
-                        .setTosUrl("https://superapp.example.com/terms-of-service.html")
-                        .setPrivacyPolicyUrl("https://superapp.example.com/privacy-policy.html")
+                        .setLogo(R.drawable.solaria_logo_1024)
+//                        .setTosUrl("https://superapp.example.com/terms-of-service.html")
+//                        .setPrivacyPolicyUrl("https://superapp.example.com/privacy-policy.html")
                         .build(),
                 RC_SIGN_IN);
     }
@@ -118,7 +118,7 @@ public class LoginActivity extends AppCompatActivity {
                     startSignInProcedure();
                 }
             } else {
-                Toast.makeText(this, "Connection refused.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Connection refused. Try again.", Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -117,7 +117,8 @@ public class SystemDataRepo {
                     userParamsDatabaseReference.child(uid).child("ph").setValue(7);
                     userParamsDatabaseReference.child(uid).child("humidity").setValue(70);
                 }
-                thresholdUpdateValuesListener.onThresholdUpdateValues();
+                if (thresholdUpdateValuesListener != null)
+                    thresholdUpdateValuesListener.onThresholdUpdateValues();
             }
 
             @Override

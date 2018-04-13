@@ -85,6 +85,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        int size = mNavigationView.getMenu().size();
+        for (int i = 0; i < size; i++) {
+            mNavigationView.getMenu().getItem(i).setChecked(false);
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         mDrawerLayout.removeDrawerListener(drawerListener);
