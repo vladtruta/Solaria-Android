@@ -81,7 +81,7 @@ public class SettingsFragment extends PreferenceFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        checkBluetoothExistsOnDevice();
+        checkBluetoothExistsOnDevice(savedInstanceState);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 
@@ -162,7 +162,7 @@ public class SettingsFragment extends PreferenceFragment {
                     public boolean onPreferenceClick(Preference preference) {
                         switch (preference.getKey()) {
                             case KEY_PREF_REFRESH:
-                                checkBluetoothEnabled();
+                                checkBluetoothEnabled(null);
                                 return true;
                         }
                         return false;
@@ -246,14 +246,14 @@ public class SettingsFragment extends PreferenceFragment {
         }
     }
 
-    private void checkBluetoothExistsOnDevice() {
+    private void checkBluetoothExistsOnDevice(Bundle savedInstanceState) {
         switch (fragmentToLaunchFromHeader) {
             case "pair": // Only the Pair menu fragment has Bluetooth features
                 if (getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
                     mRefreshPref.setEnabled(true);
                     mManagePairedDevicesCategory.setEnabled(true);
                     loadBluetoothPairCallbacks();
-                    checkBluetoothEnabled();
+                    checkBluetoothEnabled(savedInstanceState);
                 } else {
                     mRefreshPref.setEnabled(false);
                     mManagePairedDevicesCategory.setEnabled(false);
@@ -327,7 +327,7 @@ public class SettingsFragment extends PreferenceFragment {
         mManagePairedDevicesCategory.addPreference(pref);
     }
 
-    private void checkBluetoothEnabled() {
+    private void checkBluetoothEnabled(Bundle savedInstanceState) {
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         if (bluetoothManager != null) {
@@ -338,7 +338,9 @@ public class SettingsFragment extends PreferenceFragment {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         } else {
-            scanLeDevice(true);
+            //TODO: might remove it
+            if (savedInstanceState == null)
+                scanLeDevice(true);
         }
     }
 
