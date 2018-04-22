@@ -3,7 +3,7 @@ This is the Android App for Project Solaria. This, along with the Web Applicatio
 are the software part of the whole system, which will allow the users to control 
 their devices remotely.
 
-Before seeing sensor values, you need to pair the device to the App. To do that,
+Before being able to control a system, you need to pair it to the App. To do that,
 you can either use Bluetooth Low Energy for a one-tap pairing solution, or manually
 enter the system's Access Code (located on a sticker, on the actual Arduino chip).
 
