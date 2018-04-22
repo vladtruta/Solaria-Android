@@ -1,6 +1,6 @@
 # Solaria-Android
 This is the Android App for Project Solaria. This, along with the Web Application, 
-are the software part of the whole system, which will allow the users to control 
+comprise the software part of the whole system, which will allow the users to control 
 their devices remotely.
 
 Before being able to control a system, you need to pair it to the App. To do that,
