@@ -7,5 +7,5 @@ Before being able to control a system, you need to pair it to the App. To do tha
 you can either use Bluetooth Low Energy for a one-tap pairing solution, or manually
 enter the system's Access Code (located on a sticker, on the actual Arduino chip).
 
-The Solaria App makes it easy to monitor the status of all your hydroponic systems,
-and also to get notified in case something goes wrong.
+The Solaria App makes it easy to monitor the status of all the hydroponic systems,
+you own, and also to get notified in case something goes wrong.
